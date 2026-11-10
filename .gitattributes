@@ -1,0 +1,9 @@
+# Keep the repository byte-identical across platforms
+* text=auto eol=lf
+
+# Binary artefacts
+*.png binary
+*.jpg binary
+*.pdf binary
+*.npy binary
+*.npz binary

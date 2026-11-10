@@ -1,0 +1,3 @@
+# Test dependencies
+-r requirements.txt
+pytest>=7

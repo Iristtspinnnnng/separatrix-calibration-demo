@@ -1,0 +1,13 @@
+# Core dependencies (CPU only; enough for every experiment in this repo)
+numpy>=1.21
+scipy>=1.7
+scikit-learn>=1.0
+matplotlib>=3.5
+
+# Optional: GPU backend for the classifier, ~10x faster on the refinement loop.
+# Install the CUDA build that matches your driver, e.g.
+#   pip install torch --index-url https://download.pytorch.org/whl/cu130
+# torch>=2.0
+
+# Optional: running the test suite
+#   pip install -r requirements-dev.txt

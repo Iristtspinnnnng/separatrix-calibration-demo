@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Separatrix calibration demo — what entropy-driven refinement cannot see</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <h1>Separatrix calibration demo</h1>
+  <p class="lede">
+    Two ways an entropy-driven refinement loop can be blind on the Newton fractal
+    <span class="mono">f(z)&nbsp;=&nbsp;z³−1</span> of
+    <a href="https://arxiv.org/abs/2608.14743">arXiv:2608.14743</a>, measured on the
+    paper's own benchmark: <b>buried islands</b> that the acquisition never reaches,
+    and <b>peninsulas</b> that are reached but too thin to resolve. Every number here
+    comes from <span class="mono">results/</span> in the repository; the fractal and
+    the sampling grids are computed live in your browser.
+  </p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="system" class="active">1 · The system</button>
+  <button data-tab="resolution">2 · Resolution</button>
+  <button data-tab="evidence">3 · The evidence</button>
+  <button data-tab="trap">4 · The metric trap</button>
+</nav>
+
+<main>
+
+<!-- ==================== 1. the system ==================== -->
+<section class="tab active" id="tab-system">
+  <div class="grid2">
+    <div class="panel">
+      <h2>Basins of attraction of z³ − 1</h2>
+      <canvas id="fractal" class="stage" width="720" height="720"></canvas>
+      <p class="small">
+        Scroll to zoom · drag to pan · click an island to select it.
+        The three colours are the three roots; the white-ish filaments are points
+        that take many Newton steps — the fractal separatrix.
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>A uniform grid almost never lands on an island</h2>
+      <p class="small">
+        68 small patches of one basin are completely enclosed by another. They are
+        3.0–6.3 fine cells across at 3200², i.e. 0.0028–0.0059 units, against a
+        window of 3 units — and they cover 0.0088&nbsp;% of the plane.
+      </p>
+
+      <label class="ctl" for="grid-n">Training grid:
+        <b id="grid-n-label">300 × 300</b> points</label>
+      <input id="grid-n" type="range" min="40" max="1400" step="10" value="300">
+
+      <dl class="readout" id="system-readout"></dl>
+
+      <div class="row" style="margin-top:14px">
+        <button class="pill ghost" id="btn-reset">reset view</button>
+        <button class="pill" id="btn-island">zoom to the largest island</button>
+      </div>
+
+      <div class="callout" id="system-note"></div>
+
+      <p class="small">
+        The acquisition step of the loop keeps the top 10&nbsp;% of the evaluation
+        grid <em>by entropy</em> and jitters those points. Its support is the training
+        grid, so an island that the grid missed can never be proposed, however large
+        its entropy. Measured: 92&nbsp;% of the buried islands are already above the
+        85th entropy percentile in round 1.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 2. resolution ==================== -->
+<section class="tab" id="tab-resolution">
+  <div class="grid2 even">
+    <div class="panel">
+      <h2>Ground truth</h2>
+      <canvas id="truth" class="stage" width="480" height="480"></canvas>
+      <p class="small">Correct basin label, computed in your browser at display
+        resolution. The box marks the island's interior cells.</p>
+    </div>
+    <div class="panel">
+      <h2>What the classifier predicts</h2>
+      <canvas id="pred" class="stage" width="480" height="480"></canvas>
+      <p class="small">Same window, same scale: an MLP trained on a 200 × 200 grid
+        over this window only. Orange = the island's basin, red = the basin
+        surrounding it.</p>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:20px">
+    <div class="panel">
+      <h2>The same island, at a controlled relative scale</h2>
+      <p class="small">
+        Keeping the island fixed and zooming the <em>training window</em> changes how
+        many samples fit across it, while architecture, sample count and the domain
+        (in cells) stay put. <span class="mono">samples across = 199 / k</span>.
+      </p>
+
+      <div class="row" style="margin:10px 0 4px">
+        <span class="small" style="margin-right:6px">capacity</span>
+        <span id="cap-buttons" class="row"></span>
+      </div>
+      <label class="ctl" for="zoom">Zoom factor k: <b id="zoom-label"></b></label>
+      <input id="zoom" type="range" min="0" max="5" step="1" value="4">
+
+      <dl class="readout" id="res-readout"></dl>
+      <div class="callout warn" id="res-note"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Recovery vs samples across the island</h2>
+      <canvas id="chart-zoom" class="chart" width="560" height="300"></canvas>
+      <div class="legend" id="legend-zoom"></div>
+      <p class="small">
+        Each point is one trained network. Below ~2 samples across, no capacity
+        tested recovers the island; above ~13 everything does. The transition is
+        where the failure lives, and the aggregate accuracy (0.91–0.98 away from the
+        island) does not move.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 3. evidence ==================== -->
+<section class="tab" id="tab-evidence">
+  <div class="grid2 even">
+    <div class="panel">
+      <h2>Islands: recovery vs samples across</h2>
+      <canvas id="chart-island" class="chart" width="560" height="300"></canvas>
+      <div class="legend" id="legend-island"></div>
+      <p class="small">5 seeds, clean density experiment (fixed window content),
+        with ±1 std over seeds. Dotted lines: the 50&nbsp;% crossing <span
+        class="mono">w_c</span>.</p>
+    </div>
+    <div class="panel">
+      <h2>Capacity moves the boundary by 1.3×</h2>
+      <canvas id="chart-wc" class="chart" width="560" height="300"></canvas>
+      <p class="small">
+        <span class="mono">w_c ≈ 4.6 · params^−0.053</span>: a 212× increase in
+        parameters buys a 1.33× larger threshold. Capacity is not the cure for
+        reachability-limited features.
+      </p>
+    </div>
+    <div class="panel">
+      <h2>Peninsulas: recovery vs corridor thickness</h2>
+      <canvas id="chart-pen" class="chart" width="560" height="300"></canvas>
+      <div class="legend" id="legend-pen"></div>
+      <p class="small">Thin corridors (<span class="mono">t/h ≲ 2</span>) are frozen
+        into the neighbouring basin. More samples barely help: the root is already
+        densely sampled.</p>
+    </div>
+    <div class="panel">
+      <h2>Peninsulas: root → tip</h2>
+      <canvas id="chart-root" class="chart" width="560" height="300"></canvas>
+      <div class="legend" id="legend-root"></div>
+      <p class="small">Only the root survives. One bin further out the classifier is
+        at chance and the neighbouring basin takes 31–40&nbsp;% of the cells.</p>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:20px">
+    <h2>What the paper's own protocol sees</h2>
+    <p class="small">
+      40 000 uniform initial conditions (200 × 200), evaluation on 160 000 points
+      (400 × 400), the top 10&nbsp;% by entropy (16 000) used to train the generative
+      model, scored by Chamfer / sliced Wasserstein <em>between that set and the
+      model's samples</em>.
+    </p>
+    <table class="data" id="table-protocol"></table>
+  </div>
+</section>
+
+<!-- ==================== 4. the trap ==================== -->
+<section class="tab" id="tab-trap">
+  <div class="grid2">
+    <div class="panel">
+      <h2>Same models, two populations</h2>
+      <div class="row" style="margin-bottom:8px">
+        <span id="pop-buttons" class="row"></span>
+      </div>
+      <canvas id="chart-trap" class="chart" width="560" height="320"></canvas>
+      <div class="legend" id="legend-trap"></div>
+    </div>
+    <div class="panel">
+      <h2>Why the sign flips</h2>
+      <p>The refinement loop scores "separatrix accuracy" on the <em>current training
+        set</em>. That set is re-drawn every round and becomes boundary-dominated
+        (0&nbsp;% → 55&nbsp;% of the points), so the round-to-round difference mixes a
+        model change with a population change.</p>
+      <dl class="readout" id="trap-readout"></dl>
+      <div class="callout" id="trap-note"></div>
+      <p class="small">
+        Isolated with one oracle held fixed
+        (<span class="mono">experiments/metric_bias.py</span>): the escape-proxy
+        accuracy falls by 0.047 on the changing training set and rises by 0.074 on a
+        fixed uniform population — the same five models, the same oracle.
+      </p>
+      <p class="small">
+        The consequence for this repository: the "oversampling damages the model"
+        reading was a measurement artefact. What actually happens is that accuracy
+        inside the band improves (0.467 → 0.533) and the calibration error inside the
+        band falls (0.083 → 0.060).
+      </p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p>
+    Measurements: <span class="mono">experiments/*.py</span> → <span
+    class="mono">results/*.csv|json</span>. This page is static, has no build step,
+    no external libraries and no network access.
+    The full write-up is in <a href="../README.md">README.md</a> and
+    <a href="RESULTS.md">RESULTS.md</a>.
+  </p>
+</footer>
+
+<script src="data/islands.js"></script>
+<script src="data/cases.js"></script>
+<script src="data/stats.js"></script>
+<script src="fractal.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

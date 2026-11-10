@@ -1,0 +1,18 @@
+{
+ "n_islands": 68,
+ "n_buried": 60,
+ "island_area_pct": 0.0088,
+ "n_train": 39986,
+ "train_points_in_islands": 4,
+ "train_islands_touched": 4,
+ "train_cells_covered": 4,
+ "train_cells_total": 904,
+ "n_eval": 160000,
+ "n_selected": 16000,
+ "eval_points_in_islands": 28,
+ "selected_in_islands": 22,
+ "islands_with_selected": 22,
+ "island_cells_recovered": 63,
+ "island_cells_evaluated": 692,
+ "island_recovery_pct": 9.1
+}

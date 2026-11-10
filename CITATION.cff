@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If this repository helps your work, cite the paper it audits first and this repository second."
+title: "Separatrix calibration demo"
+abstract: >-
+  A reproducible audit of the entropy-driven refinement step in
+  Crabtree et al. (2026), "Generative Learning of Separatrices"
+  (arXiv:2608.14743). Measures two failure modes of the chain
+  (unreachable buried islands, unresolved peninsulas), the resolution
+  criteria that predict them, and a population-shift trap in the metric
+  the refinement is usually evaluated with.
+authors:
+  - family-names: Zhao
+    given-names: Mingkang
+    email: lingjichen@foxmail.com
+version: 0.2.0
+date-released: "2026-11-09"
+license: MIT
+repository-code: "https://github.com/Iristtspinnnnng/separatrix-calibration-demo"
+keywords:
+  - basins of attraction
+  - separatrix
+  - uncertainty quantification
+  - Monte Carlo dropout
+  - generative modelling
+  - basin stability
+references:
+  - type: article
+    title: "Generative Learning of Separatrices"
+    authors:
+      - family-names: Crabtree
+        given-names: Ellis R.
+      - family-names: Giovanis
+        given-names: Dimitris G.
+      - family-names: Georgiou
+        given-names: Anastasia
+      - family-names: Datseris
+        given-names: George
+      - family-names: Kevrekidis
+        given-names: Ioannis G.
+    year: 2026
+    eprint: 2608.14743
+    archive-prefix: arXiv
+    primary-class: cs.LG
